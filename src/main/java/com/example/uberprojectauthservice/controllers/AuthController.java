@@ -27,6 +27,11 @@ public class AuthController {
 
     }
 
+    /**
+     * Here we are getting email and password and return the access token if user is authentic
+     *
+     * @return
+     */
     @GetMapping("/signin/passenger")
     public ResponseEntity<?> signIn() {
 
