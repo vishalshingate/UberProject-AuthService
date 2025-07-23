@@ -1,8 +1,14 @@
 package com.example.uberprojectauthservice.configurations;
 
+import com.example.uberprojectauthservice.repositories.PassengerRepository;
+import com.example.uberprojectauthservice.services.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration;
@@ -12,6 +18,17 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class SpringSecurity  {
+
+    private PassengerRepository passengerRepository;
+    public SpringSecurity(PassengerRepository passengerRepository) {
+        this.passengerRepository = passengerRepository;
+    }
+
+    @Bean
+    public UserDetailsServiceImpl userDetailsService()
+    {
+        return new UserDetailsServiceImpl(passengerRepository);
+    }
     // cors and csrf
 
     @Bean
@@ -26,6 +43,29 @@ public class SpringSecurity  {
             ).build();
     }
 
+    /**
+     *This is strategy interface that allows us for various type of authentication scheme will pageable in your application
+     *
+     * In this method you can provide the logic how you authentication actually going to happen
+     * based on email or based email pass, username pass or any other combination
+     * @return
+     */
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+
+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+
+        authenticationProvider.setUserDetailsService(userDetailsService());
+        authenticationProvider.setPasswordEncoder(bCryptPasswordEncoder());
+        return authenticationProvider;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+        return configuration.getAuthenticationManager();
+    }
+    // above two function we gave written because we wanted to use the internal matching by spring
+    // if you don't want you can use custom mechanism too
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {

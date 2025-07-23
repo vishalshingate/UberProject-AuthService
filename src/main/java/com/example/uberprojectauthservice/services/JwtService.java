@@ -24,7 +24,7 @@ public class JwtService implements CommandLineRunner {
     private String secret;
 
     // this method creates the brand new jwt token based on the payload
-    private String createToken(Map<String, Object> payload, String email) {
+    public String createToken(Map<String, Object> payload, String email) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expiry*1000L);
         return Jwts.builder()
@@ -37,7 +37,10 @@ public class JwtService implements CommandLineRunner {
 
     }
 
-    private Claims extractAllPayload(String token) {
+    public String createToken(String email) {
+        return createToken(new HashMap<>(), email);
+    }
+    public Claims extractAllPayload(String token) {
 
         return Jwts.parser().
             setSigningKey(getSignKey())
@@ -47,7 +50,7 @@ public class JwtService implements CommandLineRunner {
 
     }
 
-    private Key getSignKey()
+    public Key getSignKey()
     {
         return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
@@ -57,7 +60,7 @@ public class JwtService implements CommandLineRunner {
     }
 
 
-    private Date extractExpiration(String token) {
+    public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
 
@@ -67,11 +70,11 @@ public class JwtService implements CommandLineRunner {
      * @param token JWT token
      * @return true if token is expired
      */
-    private boolean isTokenExpired(String token) {
+    public boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
-    private String extractEmail(String token) {
+    public String extractEmail(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
@@ -89,7 +92,7 @@ public class JwtService implements CommandLineRunner {
 
     }
 
-    private String extractPhoneNumber(String token) {
+    public String extractPhoneNumber(String token) {
         Claims claims = extractAllPayload(token);
         return claims.get("phoneNumber").toString();
     }

@@ -30,6 +30,10 @@ public class AuthPassengerDetails extends Passenger implements UserDetails{
     public String getUsername() {
         return this.username;
     }
+    @Override
+    public String getPassword() {
+        return this.password;
+    }
 
     @Override
     public boolean isAccountNonExpired() {
@@ -45,7 +49,6 @@ public class AuthPassengerDetails extends Passenger implements UserDetails{
     public boolean isCredentialsNonExpired() {
       return  true;
     }
-
     @Override
     public boolean isEnabled() {
         return true;
