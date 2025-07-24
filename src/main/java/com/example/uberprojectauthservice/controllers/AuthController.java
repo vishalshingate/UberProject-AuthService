@@ -6,6 +6,8 @@ import com.example.uberprojectauthservice.dto.PassengerSignupRequestDto;
 
 import com.example.uberprojectauthservice.services.AuthService;
 import com.example.uberprojectauthservice.services.JwtService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +22,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -80,6 +83,20 @@ public class AuthController {
         else {
             throw new UsernameNotFoundException("Invalid email or password");
         }
+    }
+
+    @GetMapping("/validate")
+    public ResponseEntity<?> validateToken(HttpServletRequest request) {
+        Cookie cookie = Arrays.stream(request.getCookies())
+            .filter(cookie1 -> cookie1.getName().equals("JwtToken")).findFirst().get();
+        String token = cookie.getValue();
+        System.out.println("Value"+ cookie.getValue());
+        String email = jwtService.extractEmail(token);
+        boolean authenticated = jwtService.validateToken(token, email);
+        if(authenticated) {
+            return ResponseEntity.ok().body("Authentication Successful");
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
 }

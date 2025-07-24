@@ -1,5 +1,6 @@
 package com.example.uberprojectauthservice.configurations;
 
+import com.example.uberprojectauthservice.filters.JwtAuthFilter;
 import com.example.uberprojectauthservice.repositories.PassengerRepository;
 import com.example.uberprojectauthservice.services.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
@@ -14,6 +15,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -32,15 +34,18 @@ public class SpringSecurity  {
     // cors and csrf
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter) throws Exception {
 
         return http.csrf(csrf->csrf.disable())
             .authorizeHttpRequests(auth ->
                 auth
                     .requestMatchers("/api/v1/auth/signup/*").permitAll()
                     .requestMatchers("/api/v1/auth/signin/*").permitAll()
-
-            ).build();
+            )
+            .authorizeHttpRequests(auth ->auth.requestMatchers("/api/v1/auth/validate").authenticated())
+            .authenticationProvider(authenticationProvider())
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+            .build();
     }
 
     /**
